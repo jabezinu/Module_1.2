@@ -45,19 +45,21 @@ warehouse
 - location
 - size
 - capacity_unit
+- number_of_sections
 - manager_id (FK → employee.employee_id)
 ```
 
 * **location**: city or address of the warehouse.
 * **size**: total storage area (e.g., in square meters).
-* **capacity\_unit**: how capacity is measured (e.g., pallets, cubic meters).
+* **capacity\_unit**: how capacity is measured (e.g., metre cube).
+* **number\_of\_sections**: number of sections in the warehouse.
 * **manager\_id**: links to the employee responsible for managing the warehouse.
 
 ➡️ Example:
 
-| warehouse\_id | name          | location | size | capacity\_unit | manager\_id |
-| ------------- | ------------- | -------- | ---- | -------------- | ----------- |
-| 1             | Central Depot | New York | 5000 | pallets        | 101         |
+| warehouse\_id | name          | location | size | capacity\_unit | number\_of\_sections | manager\_id |
+| ------------- | ------------- | -------- | ---- | -------------- | -------------------- | ----------- |
+| 1             | Central Depot | New York | 5000 | metre cube     | 0                    | 101         |
 
 ---
 
@@ -71,18 +73,19 @@ warehouse_section
 - name
 - warehouse_id (FK → warehouse.warehouse_id)
 - section_type
-- capacity_unit
 - temperature_range
+- is_available
 ```
 
-* **section\_type**: e.g., “cold storage”, “dry goods”, “bulk area”.
+* **section\_type**: e.g., "cold storage", "dry goods", "bulk area".
 * **temperature\_range**: helps store sensitive products correctly.
+* **is\_available**: indicates if the section is available for use.
 
 ➡️ Example:
 
-| section\_id | name      | warehouse\_id | section\_type | capacity\_unit | temperature\_range |
-| ----------- | --------- | ------------- | ------------- | -------------- | ------------------ |
-| 11          | Cold Room | 1             | Refrigerated  | pallets        | 0–5°C              |
+| section\_id | name      | warehouse\_id | section\_type | temperature\_range | is\_available |
+| ----------- | --------- | ------------- | ------------- | ------------------ | ------------- |
+| 11          | Cold Room | 1             | Refrigerated  | 0–5°C              | true          |
 
 ---
 
@@ -258,9 +261,9 @@ Here’s how a backend developer can use this schema:
 
 2. **Space Tracking Example**
 
-   * Query total capacity of a section (`capacity_unit`).
-   * Count how many items are stored.
-   * Subtract to find open space available.
+    * Query total capacity of a warehouse (`capacity_unit`).
+    * Count how many items are stored.
+    * Subtract to find open space available.
 
 3. **Responsibility Assignment**
 

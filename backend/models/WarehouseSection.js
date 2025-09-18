@@ -5,8 +5,8 @@ const warehouseSectionSchema = new mongoose.Schema({
   name: { type: String, required: true },
   warehouse_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Warehouse', required: true },
   section_type: { type: String, required: true },
-  capacity_unit: { type: String, required: true },
-  temperature_range: { type: String, required: true }
+  temperature_range: { type: String, required: true },
+  is_available: { type: Boolean, default: true }
 });
 
 const WarehouseSection = mongoose.model('WarehouseSection', warehouseSectionSchema);

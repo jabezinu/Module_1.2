@@ -5,7 +5,8 @@ const warehouseSchema = new mongoose.Schema({
   name: { type: String, required: true },
   location: { type: String, required: true },
   size: { type: Number, required: true },
-  capacity_unit: { type: String, required: true },
+  capacity_unit: { type: String, required: true, default: 'metre cube' },
+  number_of_sections: { type: Number, default: 0 },
   manager_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee', required: true }
 });
 

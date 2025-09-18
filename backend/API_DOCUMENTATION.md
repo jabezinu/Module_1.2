@@ -27,7 +27,8 @@ POST /warehouses
   "name": "Central Depot",
   "location": "New York",
   "size": 5000,
-  "capacity_unit": "pallets",
+  "capacity_unit": "metre cube",
+  "number_of_sections": 0,
   "manager_id": "64f1a2b3c4d5e6f7g8h9i0j1"
 }
 ```
@@ -40,7 +41,8 @@ POST /warehouses
   "name": "Central Depot",
   "location": "New York",
   "size": 5000,
-  "capacity_unit": "pallets",
+  "capacity_unit": "metre cube",
+  "number_of_sections": 0,
   "manager_id": "64f1a2b3c4d5e6f7g8h9i0j1",
   "__v": 0
 }
@@ -60,7 +62,8 @@ GET /warehouses
     "name": "Central Depot",
     "location": "New York",
     "size": 5000,
-    "capacity_unit": "pallets",
+    "capacity_unit": "metre cube",
+    "number_of_sections": 0,
     "manager_id": {
       "_id": "64f1a2b3c4d5e6f7g8h9i0j2",
       "employee_id": 101,
@@ -96,8 +99,8 @@ GET /warehouses/:id/sections
     "name": "Cold Room",
     "warehouse_id": "64f1a2b3c4d5e6f7g8h9i0j1",
     "section_type": "Refrigerated",
-    "capacity_unit": "pallets",
     "temperature_range": "0–5°C",
+    "is_available": true,
     "__v": 0
   }
 ]
@@ -138,8 +141,8 @@ POST /sections
   "name": "Cold Room",
   "warehouse_id": "64f1a2b3c4d5e6f7g8h9i0j1",
   "section_type": "Refrigerated",
-  "capacity_unit": "pallets",
-  "temperature_range": "0–5°C"
+  "temperature_range": "0–5°C",
+  "is_available": true
 }
 ```
 
