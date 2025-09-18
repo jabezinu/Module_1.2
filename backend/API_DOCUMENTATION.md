@@ -180,7 +180,8 @@ POST /employees
   "last_name": "Johnson",
   "role": "Manager",
   "phone": "1234567890",
-  "email": "alice@company.com"
+  "email": "alice@company.com",
+  "warehouse_id": "64f1a2b3c4d5e6f7g8h9i0j1"
 }
 ```
 
@@ -198,6 +199,13 @@ GET /employees/:id
 ```http
 PUT /employees/:id
 ```
+
+### Get Employees by Warehouse
+```http
+GET /employees/warehouse/:warehouseId
+```
+
+**Response:** Array of employees assigned to the specified warehouse
 
 ### Delete Employee
 ```http

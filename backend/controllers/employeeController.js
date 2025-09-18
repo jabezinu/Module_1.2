@@ -12,7 +12,7 @@ export const createEmployee = async (req, res) => {
 
 export const getEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find();
+    const employees = await Employee.find().populate('warehouse_id');
     res.json(employees);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -21,7 +21,7 @@ export const getEmployees = async (req, res) => {
 
 export const getEmployeeById = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
+    const employee = await Employee.findById(req.params.id).populate('warehouse_id');
     if (!employee) return res.status(404).json({ error: 'Employee not found' });
     res.json(employee);
   } catch (error) {
@@ -44,6 +44,15 @@ export const deleteEmployee = async (req, res) => {
     const employee = await Employee.findByIdAndDelete(req.params.id);
     if (!employee) return res.status(404).json({ error: 'Employee not found' });
     res.json({ message: 'Employee deleted' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getWarehouseEmployees = async (req, res) => {
+  try {
+    const employees = await Employee.find({ warehouse_id: req.params.warehouseId }).populate('warehouse_id');
+    res.json(employees);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

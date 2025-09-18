@@ -98,6 +98,7 @@ employee
 - role
 - phone
 - email
+- warehouse_id (FK → warehouse.warehouse_id)
 ```
 
 ➡️ Example:
