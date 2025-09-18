@@ -123,15 +123,14 @@ product
 - sku
 - description
 - category
-- unit_measure
 - storage_condition
 ```
 
 ➡️ Example:
 
-| product\_id | name | sku     | category | unit\_measure | storage\_condition |
-| ----------- | ---- | ------- | -------- | ------------- | ------------------ |
-| 501         | Milk | MLK-001 | Dairy    | liters        | Refrigerated       |
+| product\_id | name | sku     | category | storage\_condition |
+| ----------- | ---- | ------- | -------- | ------------------ |
+| 501         | Milk | MLK-001 | Dairy    | Refrigerated       |
 
 ---
 
@@ -143,15 +142,16 @@ Represents product variants (e.g., same product in different sizes).
 sub_product
 - sub_product_id (PK)
 - name
+- unit_size
 - product_id (FK → product.product_id)
 ```
 
 ➡️ Example:
 
-| sub\_product\_id | name       | product\_id |
-| ---------------- | ---------- | ----------- |
-| 601              | Milk 1L    | 501         |
-| 602              | Milk 500ml | 501         |
+| sub\_product\_id | name       | unit_size | product\_id |
+| ---------------- | ---------- | --------- | ----------- |
+| 601              | Milk 1L    | 1L        | 501         |
+| 602              | Milk 500ml | 500ml     | 501         |
 
 ---
 

@@ -6,7 +6,6 @@ const productSchema = new mongoose.Schema({
   sku: { type: String, required: true, unique: true },
   description: { type: String },
   category: { type: String, required: true },
-  unit_measure: { type: String, required: true },
   storage_condition: { type: String, required: true }
 });
 

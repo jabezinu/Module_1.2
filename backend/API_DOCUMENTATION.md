@@ -232,7 +232,6 @@ POST /products
   "sku": "MLK-001",
   "description": "Fresh dairy milk",
   "category": "Dairy",
-  "unit_measure": "liters",
   "storage_condition": "Refrigerated"
 }
 ```
@@ -259,6 +258,7 @@ GET /products/:id/sub-products
     "_id": "64f1a2b3c4d5e6f7g8h9i0j4",
     "sub_product_id": 601,
     "name": "Milk 1L",
+    "unit_size": "1L",
     "product_id": "64f1a2b3c4d5e6f7g8h9i0j5",
     "__v": 0
   }
@@ -289,6 +289,7 @@ POST /sub-products
 {
   "sub_product_id": 601,
   "name": "Milk 1L",
+  "unit_size": "1L",
   "product_id": "64f1a2b3c4d5e6f7g8h9i0j5"
 }
 ```
