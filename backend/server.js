@@ -1,19 +1,36 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import 'dotenv/config';
+import connectDB from './config/database.js';
+
+// Import routes
+import warehouseRoutes from './routes/warehouseRoutes.js';
+import sectionRoutes from './routes/sectionRoutes.js';
+import employeeRoutes from './routes/employeeRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import subProductRoutes from './routes/subProductRoutes.js';
+import itemRoutes from './routes/itemRoutes.js';
+import supplierRoutes from './routes/supplierRoutes.js';
+import carrierRoutes from './routes/carrierRoutes.js';
 
 const app = express();
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+connectDB();
+
+// Middleware
+app.use(express.json());
+
+// Routes
+app.use('/warehouses', warehouseRoutes);
+app.use('/sections', sectionRoutes);
+app.use('/employees', employeeRoutes);
+app.use('/products', productRoutes);
+app.use('/sub-products', subProductRoutes);
+app.use('/items', itemRoutes);
+app.use('/suppliers', supplierRoutes);
+app.use('/carriers', carrierRoutes);
 
 const PORT = process.env.PORT || 3000;
-
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
