@@ -10,6 +10,8 @@ import Shipments from './pages/Shipments';
 import Products from './pages/Products';
 import SubProducts from './pages/SubProducts';
 import Items from './pages/Items';
+import Suppliers from './pages/Suppliers';
+import Carriers from './pages/Carriers';
 import Employees from './pages/Employees';
 
 // Protected Route component
@@ -51,8 +53,8 @@ const AppRoutes = () => {
                 <Route path="/products" element={<Products />} />
                 <Route path="/sub-products" element={<SubProducts />} />
                 <Route path="/items" element={<Items />} />
-                <Route path="/suppliers" element={<div>Suppliers Page</div>} />
-                <Route path="/carriers" element={<div>Carriers Page</div>} />
+                <Route path="/suppliers" element={<Suppliers />} />
+                <Route path="/carriers" element={<Carriers />} />
                 <Route path="/shipments" element={<Shipments />} />
                 <Route path="/admins" element={<div>Admins Page</div>} />
               </Routes>

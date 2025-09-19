@@ -6,7 +6,7 @@ const WarehouseSections = () => {
   const { warehouseId } = useParams();
   const navigate = useNavigate();
   const [sections, setSections] = useState([]);
-  const [warehouses, setWarehouses] = useState([]);
+  const [warehouses, setWarehouseds] = useState([]);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
