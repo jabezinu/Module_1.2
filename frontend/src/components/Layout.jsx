@@ -15,6 +15,7 @@ const Layout = ({ children }) => {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: '📊', permission: 'view_analytics' },
     { name: 'Warehouses', href: '/warehouses', icon: '🏭', permission: 'manage_warehouses' },
+    { name: 'Sections', href: '/warehouse-sections', icon: '🏗️', permission: 'manage_warehouses' },
     { name: 'Employees', href: '/employees', icon: '👥', permission: 'manage_employees' },
     { name: 'Products', href: '/products', icon: '📦', permission: 'manage_inventory' },
     { name: 'Items', href: '/items', icon: '📦', permission: 'manage_inventory' },

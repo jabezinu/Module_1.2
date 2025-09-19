@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { warehouseAPI, employeeAPI } from '../services/api';
 
 const Warehouses = () => {
@@ -107,12 +108,20 @@ const Warehouses = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Warehouses</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-        >
-          Add Warehouse
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            Add Warehouse
+          </button>
+          <Link
+            to="/warehouse-sections"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            Manage Sections
+          </Link>
+        </div>
       </div>
 
       {error && (
@@ -231,6 +240,12 @@ const Warehouses = () => {
                     </div>
                   </div>
                   <div className="flex space-x-2">
+                    <Link
+                      to={`/warehouse-sections/${warehouse._id}`}
+                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+                    >
+                      View Sections
+                    </Link>
                     <button
                       onClick={() => handleEdit(warehouse)}
                       className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
