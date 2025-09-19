@@ -17,8 +17,6 @@ const Layout = ({ children }) => {
     { name: 'Warehouses', href: '/warehouses', icon: '🏭', permission: 'manage_warehouses' },
     { name: 'Employees', href: '/employees', icon: '👥', permission: 'manage_employees' },
     { name: 'Products', href: '/products', icon: '📦', permission: 'manage_inventory' },
-    { name: 'Sub-Products', href: '/sub-products', icon: '📦', permission: 'manage_inventory' },
-    { name: 'Items', href: '/items', icon: '📦', permission: 'manage_inventory' },
     { name: 'Suppliers', href: '/suppliers', icon: '🚚', permission: 'manage_suppliers' },
     { name: 'Carriers', href: '/carriers', icon: '🚛', permission: 'manage_carriers' },
     { name: 'Shipments', href: '/shipments', icon: '📦', permission: 'manage_shipments' },
