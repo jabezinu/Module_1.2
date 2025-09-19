@@ -11,6 +11,7 @@ import subProductRoutes from './routes/subProductRoutes.js';
 import itemRoutes from './routes/itemRoutes.js';
 import supplierRoutes from './routes/supplierRoutes.js';
 import carrierRoutes from './routes/carrierRoutes.js';
+import shipmentRoutes from './routes/shipmentRoutes.js';
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use('/sub-products', subProductRoutes);
 app.use('/items', itemRoutes);
 app.use('/suppliers', supplierRoutes);
 app.use('/carriers', carrierRoutes);
+app.use('/api/shipment-infos', shipmentRoutes);
 
 const PORT = process.env.PORT || 3000;
 

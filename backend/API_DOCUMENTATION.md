@@ -329,8 +329,8 @@ POST /items
   "item_id": 701,
   "sub_product_id": "64f1a2b3c4d5e6f7g8h9i0j4",
   "supplier_id": "64f1a2b3c4d5e6f7g8h9i0j6",
+  "expiration_date": "2025-03-01",
   "warehouse_section_id": "64f1a2b3c4d5e6f7g8h9i0j3",
-  "expiration_date": "2025-03-01"
 }
 ```
 
@@ -447,6 +447,263 @@ DELETE /carriers/:id
 
 ---
 
+## 📦 Shipment Info Endpoints
+
+### Create Shipment (Inbound or Outbound)
+```http
+POST /api/shipment-infos
+```
+
+**Request Body for Supplier to Warehouse (Inbound):**
+```json
+{
+  "shipment_type": "supplier_to_warehouse",
+  "supplier_id": "64f1a2b3c4d5e6f7g8h9i0j6",
+  "origin_warehouse_id": "64f1a2b3c4d5e6f7g8h9i0j1",
+  "carrier_id": "64f1a2b3c4d5e6f7g8h9i0j8",
+  "shipment_date": "2024-01-15",
+  "employee_id": "64f1a2b3c4d5e6f7g8h9i0j2",
+  "tracking_number": "SUP123456789",
+  "notes": "New inventory delivery from supplier"
+}
+```
+
+**Request Body for Warehouse to Warehouse (Transfer):**
+```json
+{
+  "shipment_type": "warehouse_to_warehouse",
+  "items": [
+    {
+      "item_id": "64f1a2b3c4d5e6f7g8h9i0j7",
+      "quantity": 25
+    }
+  ],
+  "origin_warehouse_id": "64f1a2b3c4d5e6f7g8h9i0j1",
+  "destination_warehouse_id": "64f1a2b3c4d5e6f7g8h9i0j9",
+  "carrier_id": "64f1a2b3c4d5e6f7g8h9i0j8",
+  "estimated_delivery_date": "2024-01-12",
+  "tracking_number": "WH123456789",
+  "employee_id": "64f1a2b3c4d5e6f7g8h9i0j2",
+  "priority": "medium",
+  "notes": "Stock transfer between warehouses"
+}
+```
+
+**Request Body for Warehouse to Customer (Outbound):**
+```json
+{
+  "shipment_type": "warehouse_to_customer",
+  "items": [
+    {
+      "item_id": "64f1a2b3c4d5e6f7g8h9i0j7",
+      "quantity": 10
+    }
+  ],
+  "origin_warehouse_id": "64f1a2b3c4d5e6f7g8h9i0j1",
+  "destination_address": "123 Customer Street, City, State 12345",
+  "destination_contact": "Jane Doe - 555-0123",
+  "carrier_id": "64f1a2b3c4d5e6f7g8h9i0j8",
+  "estimated_delivery_date": "2024-01-15",
+  "tracking_number": "CUST123456789",
+  "employee_id": "64f1a2b3c4d5e6f7g8h9i0j2",
+  "priority": "high",
+  "notes": "Customer order delivery"
+}
+```
+
+**Response:**
+```json
+{
+  "_id": "64f1a2b3c4d5e6f7g8h9i0j9",
+  "shipment_id": 1001,
+  "items": [
+    {
+      "item_id": {
+        "_id": "64f1a2b3c4d5e6f7g8h9i0j7",
+        "item_id": 701,
+        "sub_product_id": {
+          "_id": "64f1a2b3c4d5e6f7g8h9i0j4",
+          "sub_product_id": 601,
+          "name": "Milk 1L",
+          "unit_size": "1L"
+        },
+        "supplier_id": {
+          "_id": "64f1a2b3c4d5e6f7g8h9i0j6",
+          "supplier_id": 801,
+          "name": "Dairy Farm"
+        },
+        "warehouse_section_id": {
+          "_id": "64f1a2b3c4d5e6f7g8h9i0j3",
+          "section_id": 11,
+          "name": "Cold Room"
+        },
+        "expiration_date": "2025-03-01T00:00:00.000Z"
+      },
+      "quantity": 10
+    }
+  ],
+  "origin_warehouse_id": {
+    "_id": "64f1a2b3c4d5e6f7g8h9i0j1",
+    "warehouse_id": 1,
+    "name": "Central Depot"
+  },
+  "destination_address": "123 Customer Street, City, State 12345",
+  "destination_contact": "Jane Doe - 555-0123",
+  "carrier_id": {
+    "_id": "64f1a2b3c4d5e6f7g8h9i0j8",
+    "carrier_id": 901,
+    "name": "FastLogistics"
+  },
+  "status": "pending",
+  "shipment_date": "2024-01-10T10:30:00.000Z",
+  "estimated_delivery_date": "2024-01-15T00:00:00.000Z",
+  "tracking_number": "FL123456789",
+  "employee_id": {
+    "_id": "64f1a2b3c4d5e6f7g8h9i0j2",
+    "employee_id": 101,
+    "first_name": "Alice",
+    "last_name": "Johnson"
+  },
+  "priority": "high",
+  "notes": "Handle with care - fragile items",
+  "createdAt": "2024-01-10T10:30:00.000Z",
+  "updatedAt": "2024-01-10T10:30:00.000Z"
+}
+```
+
+### Get All Shipments
+```http
+GET /api/shipment-infos
+```
+
+**Query Parameters:**
+- `warehouse_id`: Filter by origin warehouse
+- `destination_warehouse_id`: Filter by destination warehouse (for transfers)
+- `carrier_id`: Filter by carrier
+- `supplier_id`: Filter by supplier (for inbound shipments)
+- `status`: Filter by status (pending, in_transit, delivered, cancelled)
+- `priority`: Filter by priority (low, medium, high, urgent)
+- `shipment_type`: Filter by type (supplier_to_warehouse, warehouse_to_warehouse, warehouse_to_customer)
+- `start_date`: Filter shipments from this date (YYYY-MM-DD)
+- `end_date`: Filter shipments until this date (YYYY-MM-DD)
+- `page`: Page number (default: 1)
+- `limit`: Items per page (default: 10)
+
+**Examples:**
+```http
+GET /api/shipment-infos?status=in_transit&priority=high
+GET /api/shipment-infos?shipment_type=supplier_to_warehouse&supplier_id=64f1a2b3c4d5e6f7g8h9i0j6
+GET /api/shipment-infos?shipment_type=warehouse_to_warehouse&destination_warehouse_id=64f1a2b3c4d5e6f7g8h9i0j9
+GET /api/shipment-infos?warehouse_id=64f1a2b3c4d5e6f7g8h9i0j1&page=2&limit=5
+GET /api/shipment-infos?start_date=2024-01-01&end_date=2024-01-31
+```
+
+**Response:**
+```json
+{
+  "shipments": [
+    {
+      "_id": "64f1a2b3c4d5e6f7g8h9i0j9",
+      "shipment_id": 1001,
+      "status": "in_transit",
+      "priority": "high",
+      "shipment_date": "2024-01-10T10:30:00.000Z",
+      "items": [...],
+      "origin_warehouse_id": {...},
+      "carrier_id": {...},
+      "employee_id": {...}
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 5,
+    "totalShipments": 47,
+    "hasNext": true,
+    "hasPrev": false
+  }
+}
+```
+
+### Get Shipment by ID
+```http
+GET /api/shipment-infos/:id
+```
+
+**Response:** Same as create response with full population
+
+### Update Shipment
+```http
+PUT /api/shipment-infos/:id
+```
+
+**Request Body:** Same as create, all fields optional
+
+### Update Shipment Status
+```http
+PATCH /api/shipment-infos/:id/status
+```
+
+**Request Body:**
+```json
+{
+  "status": "in_transit"
+}
+```
+
+**Notes:**
+- When status is set to "delivered", `actual_delivery_date` is automatically set to current date
+- For inbound shipments, `received_date` is also set when status becomes "delivered"
+- Only valid status transitions are allowed
+
+### Get Shipment Statistics
+```http
+GET /api/shipment-infos/stats
+```
+
+**Query Parameters:**
+- `warehouse_id`: Filter by warehouse
+- `start_date`: Start date for statistics
+- `end_date`: End date for statistics
+
+**Response:**
+```json
+[
+  {
+    "_id": "delivered",
+    "count": 25,
+    "totalItems": 150
+  },
+  {
+    "_id": "in_transit",
+    "count": 8,
+    "totalItems": 45
+  },
+  {
+    "_id": "pending",
+    "count": 14,
+    "totalItems": 78
+  }
+]
+```
+
+### Delete Shipment
+```http
+DELETE /api/shipment-infos/:id
+```
+
+**Response:**
+```json
+{
+  "message": "Shipment deleted successfully"
+}
+```
+
+**Notes:**
+- Only shipments with "pending" status can be deleted
+- This prevents accidental deletion of shipments already in transit
+
+---
+
 ## 📊 Common Response Codes
 
 - **200**: Success
@@ -472,6 +729,30 @@ DELETE /carriers/:id
 4. Create Product
 5. Create Sub-Product (reference product)
 6. Create Supplier
-7. Create Item (reference sub-product, supplier, section)
+7. Create Carrier
+8. Create Item (reference sub-product, supplier, section)
+9. Create Supplier-to-Warehouse Shipment (inbound from supplier)
+10. Create Warehouse-to-Warehouse Shipment (transfer between warehouses)
+11. Create Warehouse-to-Customer Shipment (outbound to customer)
 
-This API provides full CRUD operations for comprehensive warehouse management.
+### Shipment Workflow Examples
+
+**Supplier to Warehouse (Inbound):**
+1. Create supplier-to-warehouse shipment with supplier details
+2. Update status to "in_transit" when supplier ships goods
+3. Update status to "delivered" when goods arrive (automatically sets delivery and received dates)
+4. Process received items into warehouse inventory system
+
+**Warehouse to Warehouse (Transfer):**
+1. Create warehouse-to-warehouse shipment with items and destination warehouse
+2. Update status to "in_transit" when transfer begins
+3. Update status to "delivered" when items arrive at destination warehouse
+4. Update inventory records in both warehouses
+
+**Warehouse to Customer (Outbound):**
+1. Create warehouse-to-customer shipment with customer details
+2. Update status to "in_transit" when shipment leaves warehouse
+3. Update status to "delivered" when customer receives goods
+4. Process delivery confirmation and update order status
+
+This API provides full CRUD operations for comprehensive warehouse management including complete shipment tracking.
