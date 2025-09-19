@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { warehouseAPI } from '../services/api';
+import { warehouseAPI, employeeAPI } from '../services/api';
 
 const Warehouses = () => {
   const [warehouses, setWarehouses] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -22,11 +23,15 @@ const Warehouses = () => {
   const fetchWarehouses = async () => {
     try {
       setLoading(true);
-      const response = await warehouseAPI.getWarehouses();
-      setWarehouses(response.data);
+      const [warehousesResponse, employeesResponse] = await Promise.all([
+        warehouseAPI.getWarehouses(),
+        employeeAPI.getEmployees()
+      ]);
+      setWarehouses(warehousesResponse.data);
+      setEmployees(employeesResponse.data);
     } catch (error) {
-      console.error('Failed to fetch warehouses:', error);
-      setError('Failed to load warehouses');
+      console.error('Failed to fetch data:', error);
+      setError('Failed to load warehouses and employees');
     } finally {
       setLoading(false);
     }
@@ -166,14 +171,20 @@ const Warehouses = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Manager ID</label>
-                  <input
-                    type="text"
+                  <label className="block text-sm font-medium text-gray-700">Warehouse Manager</label>
+                  <select
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     value={formData.manager_id}
                     onChange={(e) => setFormData({...formData, manager_id: e.target.value})}
-                  />
+                  >
+                    <option value="">Select a Manager</option>
+                    {employees.map(employee => (
+                      <option key={employee._id} value={employee._id}>
+                        {employee.first_name} {employee.last_name} (ID: {employee.employee_id}) - {employee.role}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
