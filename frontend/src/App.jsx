@@ -5,7 +5,6 @@ import Login from './components/Login';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Warehouses from './pages/Warehouses';
-import WarehouseSections from './pages/WarehouseSections';
 import Shipments from './pages/Shipments';
 import Products from './pages/Products';
 import SubProducts from './pages/SubProducts';
@@ -47,8 +46,6 @@ const AppRoutes = () => {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/warehouses" element={<Warehouses />} />
-                <Route path="/warehouse-sections" element={<WarehouseSections />} />
-                <Route path="/warehouse-sections/:warehouseId" element={<WarehouseSections />} />
                 <Route path="/employees" element={<Employees />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/sub-products" element={<SubProducts />} />

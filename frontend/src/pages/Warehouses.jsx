@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { warehouseAPI, employeeAPI } from '../services/api';
+import { warehouseAPI, employeeAPI, sectionAPI } from '../services/api';
 
 const Warehouses = () => {
   const [warehouses, setWarehouses] = useState([]);
+  const [sections, setSections] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [showSectionForm, setShowSectionForm] = useState(false);
   const [editingWarehouse, setEditingWarehouse] = useState(null);
+  const [editingSection, setEditingSection] = useState(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState('');
+  const [expandedWarehouses, setExpandedWarehouses] = useState(new Set());
   const [formData, setFormData] = useState({
     name: '',
     location: '',
@@ -16,23 +20,32 @@ const Warehouses = () => {
     capacity_unit: 'metre cube',
     manager_id: ''
   });
+  const [sectionFormData, setSectionFormData] = useState({
+    name: '',
+    warehouse_id: '',
+    section_type: '',
+    temperature_range: '',
+    is_available: true
+  });
 
   useEffect(() => {
-    fetchWarehouses();
+    fetchData();
   }, []);
 
-  const fetchWarehouses = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const [warehousesResponse, employeesResponse] = await Promise.all([
+      const [warehousesResponse, sectionsResponse, employeesResponse] = await Promise.all([
         warehouseAPI.getWarehouses(),
+        sectionAPI.getSections(),
         employeeAPI.getEmployees()
       ]);
       setWarehouses(warehousesResponse.data);
+      setSections(sectionsResponse.data);
       setEmployees(employeesResponse.data);
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      setError('Failed to load warehouses and employees');
+      setError('Failed to load warehouses data');
     } finally {
       setLoading(false);
     }
@@ -46,7 +59,7 @@ const Warehouses = () => {
       } else {
         await warehouseAPI.createWarehouse(formData);
       }
-      fetchWarehouses();
+      fetchData();
       setShowForm(false);
       setEditingWarehouse(null);
       resetForm();
@@ -72,7 +85,7 @@ const Warehouses = () => {
     if (window.confirm('Are you sure you want to delete this warehouse?')) {
       try {
         await warehouseAPI.deleteWarehouse(id);
-        fetchWarehouses();
+        fetchData();
       } catch (error) {
         console.error('Failed to delete warehouse:', error);
         setError('Failed to delete warehouse');
@@ -96,6 +109,112 @@ const Warehouses = () => {
     resetForm();
   };
 
+  const toggleWarehouseExpansion = (warehouseId) => {
+    const newExpanded = new Set(expandedWarehouses);
+    if (newExpanded.has(warehouseId)) {
+      newExpanded.delete(warehouseId);
+    } else {
+      newExpanded.add(warehouseId);
+    }
+    setExpandedWarehouses(newExpanded);
+  };
+
+  const getSectionsForWarehouse = (warehouseId) => {
+    return sections.filter(section => section.warehouse_id._id === warehouseId);
+  };
+
+  const handleAddSection = (warehouseId) => {
+    setSelectedWarehouse(warehouseId);
+    setSectionFormData({
+      name: '',
+      warehouse_id: warehouseId,
+      section_type: '',
+      temperature_range: '',
+      is_available: true
+    });
+    setShowSectionForm(true);
+  };
+
+  const handleEditSection = (section) => {
+    setEditingSection(section);
+    setSectionFormData({
+      name: section.name,
+      warehouse_id: section.warehouse_id._id,
+      section_type: section.section_type,
+      temperature_range: section.temperature_range,
+      is_available: section.is_available
+    });
+    setShowSectionForm(true);
+  };
+
+  const handleSectionSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingSection) {
+        await sectionAPI.updateSection(editingSection._id, sectionFormData);
+      } else {
+        await sectionAPI.createSection(sectionFormData);
+      }
+      fetchData();
+      setShowSectionForm(false);
+      setEditingSection(null);
+      resetSectionForm();
+    } catch (error) {
+      console.error('Failed to save section:', error);
+      setError('Failed to save warehouse section');
+    }
+  };
+
+  const handleDeleteSection = async (id) => {
+    if (window.confirm('Are you sure you want to delete this warehouse section?')) {
+      try {
+        await sectionAPI.deleteSection(id);
+        fetchData();
+      } catch (error) {
+        console.error('Failed to delete section:', error);
+        setError('Failed to delete warehouse section');
+      }
+    }
+  };
+
+  const resetSectionForm = () => {
+    setSectionFormData({
+      name: '',
+      warehouse_id: '',
+      section_type: '',
+      temperature_range: '',
+      is_available: true
+    });
+  };
+
+  const handleSectionCancel = () => {
+    setShowSectionForm(false);
+    setEditingSection(null);
+    resetSectionForm();
+  };
+
+  const getSectionTypeIcon = (type) => {
+    switch (type?.toLowerCase()) {
+      case 'refrigerated':
+      case 'cold storage':
+        return '❄️';
+      case 'dry goods':
+        return '📦';
+      case 'bulk area':
+        return '📦';
+      case 'chemicals':
+        return '⚗️';
+      case 'electronics':
+        return '🔌';
+      default:
+        return '🏭';
+    }
+  };
+
+  const getAvailabilityColor = (isAvailable) => {
+    return isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -107,21 +226,13 @@ const Warehouses = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Warehouses</h1>
-        <div className="flex space-x-3">
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            Add Warehouse
-          </button>
-          <Link
-            to="/warehouse-sections"
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            Manage Sections
-          </Link>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900">Warehouses & Sections</h1>
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+        >
+          Add Warehouse
+        </button>
       </div>
 
       {error && (
@@ -216,52 +327,191 @@ const Warehouses = () => {
         </div>
       )}
 
-      {/* Warehouses Table */}
+      {/* Section Form Modal */}
+      {showSectionForm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                {editingSection ? 'Edit Warehouse Section' : 'Add New Warehouse Section'}
+              </h3>
+              <form onSubmit={handleSectionSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Section Name</label>
+                  <input
+                    type="text"
+                    required
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    value={sectionFormData.name}
+                    onChange={(e) => setSectionFormData({...sectionFormData, name: e.target.value})}
+                    placeholder="e.g., Cold Room A, Dry Goods Section"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Section Type</label>
+                  <select
+                    required
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    value={sectionFormData.section_type}
+                    onChange={(e) => setSectionFormData({...sectionFormData, section_type: e.target.value})}
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Refrigerated">Refrigerated</option>
+                    <option value="Cold Storage">Cold Storage</option>
+                    <option value="Dry Goods">Dry Goods</option>
+                    <option value="Bulk Area">Bulk Area</option>
+                    <option value="Chemicals">Chemicals</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="General">General</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Temperature Range</label>
+                  <input
+                    type="text"
+                    required
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    value={sectionFormData.temperature_range}
+                    onChange={(e) => setSectionFormData({...sectionFormData, temperature_range: e.target.value})}
+                    placeholder="e.g., 0–5°C, Room Temperature, -20°C"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    <input
+                      type="checkbox"
+                      className="mr-2"
+                      checked={sectionFormData.is_available}
+                      onChange={(e) => setSectionFormData({...sectionFormData, is_available: e.target.checked})}
+                    />
+                    Available for Use
+                  </label>
+                </div>
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={handleSectionCancel}
+                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                  >
+                    {editingSection ? 'Update' : 'Create'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Warehouses & Sections Hierarchy */}
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <ul className="divide-y divide-gray-200">
           {warehouses.length > 0 ? (
-            warehouses.map((warehouse) => (
-              <li key={warehouse._id} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <span className="text-2xl">🏭</span>
+            warehouses.map((warehouse) => {
+              const warehouseSections = getSectionsForWarehouse(warehouse._id);
+              const isExpanded = expandedWarehouses.has(warehouse._id);
+              return (
+                <li key={warehouse._id} className="px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center flex-1">
+                      <div className="flex-shrink-0">
+                        <button
+                          onClick={() => toggleWarehouseExpansion(warehouse._id)}
+                          className="text-gray-400 hover:text-gray-600 mr-2"
+                        >
+                          {isExpanded ? '▼' : '▶'}
+                        </button>
+                        <span className="text-2xl">🏭</span>
+                      </div>
+                      <div className="ml-4 flex-1">
+                        <div className="text-sm font-medium text-gray-900">
+                          {warehouse.name} (ID: {warehouse.warehouse_id})
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {warehouse.location} • {warehouse.size} {warehouse.capacity_unit} • {warehouseSections.length} sections
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Manager: {warehouse.manager_id?.first_name} {warehouse.manager_id?.last_name}
+                        </div>
+                      </div>
                     </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {warehouse.name} (ID: {warehouse.warehouse_id})
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {warehouse.location} • {warehouse.size} {warehouse.capacity_unit}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Manager: {warehouse.manager_id?.first_name} {warehouse.manager_id?.last_name}
-                      </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleAddSection(warehouse._id)}
+                        className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Add Section
+                      </button>
+                      <button
+                        onClick={() => handleEdit(warehouse)}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(warehouse._id)}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
-                  <div className="flex space-x-2">
-                    <Link
-                      to={`/warehouse-sections/${warehouse._id}`}
-                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                      View Sections
-                    </Link>
-                    <button
-                      onClick={() => handleEdit(warehouse)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(warehouse._id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))
+                  {isExpanded && (
+                    <div className="mt-4 ml-8">
+                      {warehouseSections.length > 0 ? (
+                        <ul className="space-y-2">
+                          {warehouseSections.map((section) => (
+                            <li key={section._id} className="border-l-2 border-gray-200 pl-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <span className="text-lg mr-2">
+                                    {getSectionTypeIcon(section.section_type)}
+                                  </span>
+                                  <div>
+                                    <div className="text-sm font-medium text-gray-800">
+                                      {section.name} (ID: {section.section_id})
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      Type: {section.section_type} • Temperature: {section.temperature_range}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAvailabilityColor(section.is_available)}`}>
+                                    {section.is_available ? 'Available' : 'Unavailable'}
+                                  </span>
+                                  <div className="flex space-x-2">
+                                    <button
+                                      onClick={() => handleEditSection(section)}
+                                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteSection(section._id)}
+                                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-gray-500 ml-4">No sections found for this warehouse</p>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })
           ) : (
             <li className="px-6 py-4 text-center text-gray-500">
               No warehouses found
