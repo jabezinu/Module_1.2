@@ -1,0 +1,7 @@
+{
+  "first_name": "Admin",
+  "last_name": "User",
+  "email": "admin@warehouse.com",
+  "password": "admin123",
+  "permissions": ["full_access"]
+}
