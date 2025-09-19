@@ -6,10 +6,10 @@ http://localhost:3000
 ```
 
 ## Overview
-This API provides comprehensive warehouse management functionality including multi-location support, inventory tracking, product management, and logistics coordination.
+This API provides comprehensive warehouse management functionality including multi-location support, inventory tracking, product management, logistics coordination, and a complete admin system with role-based access control.
 
 ## Authentication
-Currently, no authentication is implemented. All endpoints are publicly accessible.
+The API implements JWT-based authentication for admin users with flexible permission-based access control. Admin endpoints require authentication, while basic warehouse operations remain accessible. The system supports granular permissions with `full_access` capability that grants complete system access without restrictions.
 
 ---
 
@@ -704,6 +704,266 @@ DELETE /api/shipment-infos/:id
 
 ---
 
+## 👑 Admin System Endpoints
+
+### Admin Permissions System
+
+**All admins have the same role ("admin") but can be assigned different permissions:**
+
+**Available Permissions:**
+- `manage_warehouses`: Create, update, delete warehouses and sections
+- `manage_employees`: Manage employee records and assignments
+- `manage_inventory`: Handle products, sub-products, and items
+- `manage_shipments`: Create and manage shipments (inbound/outbound)
+- `manage_suppliers`: Manage supplier information
+- `manage_carriers`: Handle carrier and logistics data
+- `view_analytics`: Access dashboard and analytics features
+- `manage_admins`: Create, update, and manage other admin accounts
+- `system_settings`: Access system health and configuration
+- `full_access`: **Grants ALL permissions automatically** - Admin can do everything
+
+**Default Permissions:** All new admins start with `view_analytics` permission.
+
+**Full Access Admin Capabilities:**
+When an admin has the `full_access` permission, they can perform **ALL operations** in the system:
+- ✅ **Create, read, update, delete all entities** (warehouses, employees, products, shipments, etc.)
+- ✅ **Access all dashboard analytics and system health information**
+- ✅ **Manage other admin accounts** (create, update, delete, reset passwords)
+- ✅ **View and modify system settings**
+- ✅ **Perform all shipment operations** (create, update status, delete)
+- ✅ **Access all warehouse and inventory management features**
+- ✅ **No permission restrictions** - complete system access
+
+### Authentication
+
+All admin endpoints require JWT authentication. Include the token in the Authorization header:
+```
+Authorization: Bearer <your_jwt_token>
+```
+
+---
+
+### Admin Authentication
+
+#### Login
+```http
+POST /api/admin/auth/login
+```
+
+**Request Body:**
+```json
+{
+  "email": "admin@company.com",
+  "password": "password123"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Login successful",
+  "admin": {
+    "admin_id": 1,
+    "first_name": "John",
+    "last_name": "Admin",
+    "email": "admin@company.com",
+    "role": "super_admin",
+    "permissions": ["manage_warehouses", "manage_admins"],
+    "assigned_warehouses": [...]
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+#### Register Admin (Super Admin Only)
+```http
+POST /api/admin/auth/register
+```
+
+**Request Body:**
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Manager",
+  "email": "jane@company.com",
+  "password": "securepass123",
+  "permissions": ["manage_warehouses", "manage_employees", "view_analytics"],
+  "assigned_warehouses": ["64f1a2b3c4d5e6f7g8h9i0j1"]
+}
+```
+
+#### Verify Token
+```http
+GET /api/admin/auth/verify
+```
+
+---
+
+### Admin Profile Management
+
+#### Get Profile
+```http
+GET /api/admin/profile
+```
+
+#### Update Profile
+```http
+PUT /api/admin/profile
+```
+
+**Request Body:**
+```json
+{
+  "first_name": "Updated Name",
+  "last_name": "Updated Last Name",
+  "email": "newemail@company.com"
+}
+```
+
+#### Change Password
+```http
+PUT /api/admin/profile/password
+```
+
+**Request Body:**
+```json
+{
+  "current_password": "oldpassword",
+  "new_password": "newsecurepassword"
+}
+```
+
+---
+
+### Admin Dashboard & Analytics
+
+#### Get Dashboard Overview
+```http
+GET /api/admin/dashboard/overview
+```
+
+**Response:**
+```json
+{
+  "overview": {
+    "warehouses": 5,
+    "employees": 25,
+    "products": 150,
+    "items": 2500,
+    "suppliers": 12,
+    "carriers": 8,
+    "shipments": 340
+  },
+  "recentShipments": [...],
+  "expiringItems": [...],
+  "shipmentStats": [...],
+  "alerts": {
+    "expiringItemsCount": 15,
+    "pendingShipments": 8
+  }
+}
+```
+
+#### Get Warehouse Analytics
+```http
+GET /api/admin/dashboard/warehouses
+```
+
+**Query Parameters:**
+- `warehouse_id`: Specific warehouse
+- `start_date`: Start date for analytics
+- `end_date`: End date for analytics
+
+#### Get Inventory Analytics
+```http
+GET /api/admin/dashboard/inventory
+```
+
+**Query Parameters:**
+- `category`: Product category filter
+- `warehouse_id`: Warehouse filter
+
+#### Get Shipment Analytics
+```http
+GET /api/admin/dashboard/shipments
+```
+
+**Query Parameters:**
+- `start_date`: Start date
+- `end_date`: End date
+- `shipment_type`: Filter by shipment type
+
+#### Get System Health (Super Admin Only)
+```http
+GET /api/admin/dashboard/health
+```
+
+---
+
+### Admin User Management (Super Admin Only)
+
+#### Get All Admins
+```http
+GET /api/admin/users
+```
+
+**Query Parameters:**
+- `role`: Filter by role
+- `is_active`: Filter by status
+- `page`: Page number
+- `limit`: Items per page
+
+#### Get Admin by ID
+```http
+GET /api/admin/users/:id
+```
+
+#### Create Admin
+```http
+POST /api/admin/users
+```
+
+#### Update Admin
+```http
+PUT /api/admin/users/:id
+```
+
+#### Delete Admin (Soft Delete)
+```http
+DELETE /api/admin/users/:id
+```
+
+#### Toggle Admin Status
+```http
+PATCH /api/admin/users/:id/status
+```
+
+**Request Body:**
+```json
+{
+  "is_active": false
+}
+```
+
+#### Reset Admin Password
+```http
+PATCH /api/admin/users/:id/password
+```
+
+**Request Body:**
+```json
+{
+  "new_password": "newpassword123"
+}
+```
+
+#### Get Admin Statistics
+```http
+GET /api/admin/users/stats
+```
+
+---
+
 ## 📊 Common Response Codes
 
 - **200**: Success
@@ -723,17 +983,33 @@ DELETE /api/shipment-infos/:id
 ## 🧪 Testing Examples
 
 ### Create a Complete Warehouse Setup
-1. Create Employee (Manager)
-2. Create Warehouse (reference manager)
-3. Create Section (reference warehouse)
-4. Create Product
-5. Create Sub-Product (reference product)
-6. Create Supplier
-7. Create Carrier
-8. Create Item (reference sub-product, supplier, section)
-9. Create Supplier-to-Warehouse Shipment (inbound from supplier)
-10. Create Warehouse-to-Warehouse Shipment (transfer between warehouses)
-11. Create Warehouse-to-Customer Shipment (outbound to customer)
+1. **Admin Setup:**
+   - Create Super Admin account
+   - Create additional admin accounts with appropriate roles
+   - Configure warehouse assignments for admins
+
+2. **Warehouse Infrastructure:**
+   - Create Employee (Manager)
+   - Create Warehouse (reference manager)
+   - Create Section (reference warehouse)
+
+3. **Product & Inventory Setup:**
+   - Create Product
+   - Create Sub-Product (reference product)
+   - Create Supplier
+   - Create Carrier
+   - Create Item (reference sub-product, supplier, section)
+
+4. **Shipment Operations:**
+   - Create Supplier-to-Warehouse Shipment (inbound from supplier)
+   - Create Warehouse-to-Warehouse Shipment (transfer between warehouses)
+   - Create Warehouse-to-Customer Shipment (outbound to customer)
+
+5. **Admin Monitoring:**
+   - Access dashboard analytics
+   - Monitor system health
+   - Review shipment statistics
+   - Manage user accounts
 
 ### Shipment Workflow Examples
 

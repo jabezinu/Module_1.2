@@ -12,6 +12,7 @@ import itemRoutes from './routes/itemRoutes.js';
 import supplierRoutes from './routes/supplierRoutes.js';
 import carrierRoutes from './routes/carrierRoutes.js';
 import shipmentRoutes from './routes/shipmentRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 
@@ -31,6 +32,9 @@ app.use('/items', itemRoutes);
 app.use('/suppliers', supplierRoutes);
 app.use('/carriers', carrierRoutes);
 app.use('/api/shipment-infos', shipmentRoutes);
+
+// Admin routes (with authentication)
+app.use('/api/admin', adminRoutes);
 
 const PORT = process.env.PORT || 3000;
 
