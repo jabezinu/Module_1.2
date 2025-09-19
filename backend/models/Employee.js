@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const employeeSchema = new mongoose.Schema({
-  employee_id: { type: Number, required: true, unique: true },
+  employee_id: { type: Number, unique: true },
   first_name: { type: String, required: true },
   last_name: { type: String, required: true },
   role: { type: String, required: true },

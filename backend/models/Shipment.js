@@ -6,7 +6,7 @@ const shipmentItemSchema = new mongoose.Schema({
 }, { _id: false });
 
 const shipmentSchema = new mongoose.Schema({
-  shipment_id: { type: Number, required: true, unique: true },
+  shipment_id: { type: Number, unique: true },
   shipment_type: {
     type: String,
     enum: ['supplier_to_warehouse', 'warehouse_to_warehouse', 'warehouse_to_customer'],

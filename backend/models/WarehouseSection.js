@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const warehouseSectionSchema = new mongoose.Schema({
-  section_id: { type: Number, required: true, unique: true },
+  section_id: { type: Number, unique: true },
   name: { type: String, required: true },
   warehouse_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Warehouse', required: true },
   section_type: { type: String, required: true },

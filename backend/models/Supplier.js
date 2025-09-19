@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const supplierSchema = new mongoose.Schema({
-  supplier_id: { type: Number, required: true, unique: true },
+  supplier_id: { type: Number, unique: true },
   name: { type: String, required: true },
   contact_person: { type: String, required: true },
   phone: { type: String, required: true },

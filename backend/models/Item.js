@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const itemSchema = new mongoose.Schema({
-  item_id: { type: Number, required: true, unique: true },
+  item_id: { type: Number, unique: true },
   sub_product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'SubProduct', required: true },
   supplier_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier', required: true },
   warehouse_section_id: { type: mongoose.Schema.Types.ObjectId, ref: 'WarehouseSection', required: true },
