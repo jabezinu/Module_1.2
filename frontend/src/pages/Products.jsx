@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { productAPI } from '../services/api';
+import { productAPI, subProductAPI, itemAPI } from '../services/api';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
+  const [subProducts, setSubProducts] = useState([]);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [expandedProducts, setExpandedProducts] = useState(new Set());
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -16,17 +19,23 @@ const Products = () => {
   });
 
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await productAPI.getProducts();
-      setProducts(response.data);
+      const [productsRes, subProductsRes, itemsRes] = await Promise.all([
+        productAPI.getProducts(),
+        subProductAPI.getSubProducts(),
+        itemAPI.getItems()
+      ]);
+      setProducts(productsRes.data);
+      setSubProducts(subProductsRes.data);
+      setItems(itemsRes.data);
     } catch (error) {
-      console.error('Failed to fetch products:', error);
-      setError('Failed to load products');
+      console.error('Failed to fetch data:', error);
+      setError('Failed to load products data');
     } finally {
       setLoading(false);
     }
@@ -40,7 +49,7 @@ const Products = () => {
       } else {
         await productAPI.createProduct(formData);
       }
-      fetchProducts();
+      fetchData();
       setShowForm(false);
       setEditingProduct(null);
       resetForm();
@@ -66,7 +75,7 @@ const Products = () => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await productAPI.deleteProduct(id);
-        fetchProducts();
+        fetchData();
       } catch (error) {
         console.error('Failed to delete product:', error);
         setError('Failed to delete product');
@@ -88,6 +97,24 @@ const Products = () => {
     setShowForm(false);
     setEditingProduct(null);
     resetForm();
+  };
+
+  const toggleProductExpansion = (productId) => {
+    const newExpanded = new Set(expandedProducts);
+    if (newExpanded.has(productId)) {
+      newExpanded.delete(productId);
+    } else {
+      newExpanded.add(productId);
+    }
+    setExpandedProducts(newExpanded);
+  };
+
+  const getSubProductsForProduct = (productId) => {
+    return subProducts.filter(sp => sp.product_id._id === productId);
+  };
+
+  const getItemsForSubProduct = (subProductId) => {
+    return items.filter(item => item.sub_product_id._id === subProductId);
   };
 
   if (loading) {
@@ -195,51 +222,99 @@ const Products = () => {
         </div>
       )}
 
-      {/* Products Table */}
+      {/* Products Hierarchy */}
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <ul className="divide-y divide-gray-200">
           {products.length > 0 ? (
-            products.map((product) => (
-              <li key={product._id} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <span className="text-2xl">📦</span>
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {product.name} (ID: {product.product_id})
+            products.map((product) => {
+              const productSubProducts = getSubProductsForProduct(product._id);
+              const isExpanded = expandedProducts.has(product._id);
+              return (
+                <li key={product._id} className="px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center flex-1">
+                      <div className="flex-shrink-0">
+                        <button
+                          onClick={() => toggleProductExpansion(product._id)}
+                          className="text-gray-400 hover:text-gray-600 mr-2"
+                        >
+                          {isExpanded ? '▼' : '▶'}
+                        </button>
+                        <span className="text-2xl">📦</span>
                       </div>
-                      <div className="text-sm text-gray-500">
-                        SKU: {product.sku} • Category: {product.category}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Storage: {product.storage_condition}
-                      </div>
-                      {product.description && (
-                        <div className="text-sm text-gray-500 mt-1">
-                          {product.description}
+                      <div className="ml-4 flex-1">
+                        <div className="text-sm font-medium text-gray-900">
+                          {product.name} (ID: {product.product_id})
                         </div>
+                        <div className="text-sm text-gray-500">
+                          SKU: {product.sku} • Category: {product.category} • {productSubProducts.length} sub-products
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Storage: {product.storage_condition}
+                        </div>
+                        {product.description && (
+                          <div className="text-sm text-gray-500 mt-1">
+                            {product.description}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product._id)}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  {isExpanded && (
+                    <div className="mt-4 ml-8">
+                      {productSubProducts.length > 0 ? (
+                        <ul className="space-y-2">
+                          {productSubProducts.map((subProduct) => {
+                            const subProductItems = getItemsForSubProduct(subProduct._id);
+                            return (
+                              <li key={subProduct._id} className="border-l-2 border-gray-200 pl-4">
+                                <div className="flex items-center">
+                                  <span className="text-lg mr-2">📦</span>
+                                  <div>
+                                    <div className="text-sm font-medium text-gray-800">
+                                      {subProduct.name} (ID: {subProduct.sub_product_id})
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      Unit Size: {subProduct.unit_size} • {subProductItems.length} items
+                                    </div>
+                                  </div>
+                                </div>
+                                {subProductItems.length > 0 && (
+                                  <ul className="mt-2 ml-6 space-y-1">
+                                    {subProductItems.map((item) => (
+                                      <li key={item._id} className="flex items-center text-sm text-gray-600">
+                                        <span className="mr-2">•</span>
+                                        Item ID: {item.item_id} • Supplier: {item.supplier_id?.name || 'Unknown'} • Section: {item.warehouse_section_id?.name || 'Unknown'} • Expires: {new Date(item.expiration_date).toLocaleDateString()}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-gray-500 ml-4">No sub-products found</p>
                       )}
                     </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product._id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))
+                  )}
+                </li>
+              );
+            })
           ) : (
             <li className="px-6 py-4 text-center text-gray-500">
               No products found

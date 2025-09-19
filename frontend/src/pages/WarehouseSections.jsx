@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { sectionAPI, warehouseAPI } from '../services/api';
+import { sectionAPI, warehouseAPI, itemAPI } from '../services/api';
 
 const WarehouseSections = () => {
   const { warehouseId } = useParams();
   const navigate = useNavigate();
   const [sections, setSections] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouseId || '');
+  const [expandedSections, setExpandedSections] = useState(new Set());
   const [formData, setFormData] = useState({
     name: '',
     warehouse_id: warehouseId || '',
@@ -27,13 +29,15 @@ const WarehouseSections = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [sectionsResponse, warehousesResponse] = await Promise.all([
+      const [sectionsResponse, warehousesResponse, itemsResponse] = await Promise.all([
         selectedWarehouse ? warehouseAPI.getWarehouseSections(selectedWarehouse) : sectionAPI.getSections(),
-        warehouseAPI.getWarehouses()
+        warehouseAPI.getWarehouses(),
+        itemAPI.getItems(selectedWarehouse ? { warehouse_id: selectedWarehouse } : {})
       ]);
 
       setSections(sectionsResponse.data);
       setWarehouses(warehousesResponse.data);
+      setItems(itemsResponse.data);
     } catch (error) {
       console.error('Failed to fetch data:', error);
       setError('Failed to load warehouse sections');
@@ -103,6 +107,20 @@ const WarehouseSections = () => {
   const handleWarehouseFilter = (warehouseId) => {
     setSelectedWarehouse(warehouseId);
     navigate(warehouseId ? `/warehouse-sections/${warehouseId}` : '/warehouse-sections');
+  };
+
+  const toggleSectionExpansion = (sectionId) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionId)) {
+      newExpanded.delete(sectionId);
+    } else {
+      newExpanded.add(sectionId);
+    }
+    setExpandedSections(newExpanded);
+  };
+
+  const getItemsForSection = (sectionId) => {
+    return items.filter(item => item.warehouse_section_id._id === sectionId);
   };
 
   const getSectionTypeIcon = (type) => {
@@ -284,53 +302,88 @@ const WarehouseSections = () => {
         </div>
       )}
 
-      {/* Sections Table */}
+      {/* Sections Hierarchy */}
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <ul className="divide-y divide-gray-200">
           {sections.length > 0 ? (
-            sections.map((section) => (
-              <li key={section._id} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <span className="text-2xl">
-                        {getSectionTypeIcon(section.section_type)}
+            sections.map((section) => {
+              const sectionItems = getItemsForSection(section._id);
+              const isExpanded = expandedSections.has(section._id);
+              return (
+                <li key={section._id} className="px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center flex-1">
+                      <div className="flex-shrink-0">
+                        <button
+                          onClick={() => toggleSectionExpansion(section._id)}
+                          className="text-gray-400 hover:text-gray-600 mr-2"
+                        >
+                          {isExpanded ? '▼' : '▶'}
+                        </button>
+                        <span className="text-2xl">
+                          {getSectionTypeIcon(section.section_type)}
+                        </span>
+                      </div>
+                      <div className="ml-4 flex-1">
+                        <div className="text-sm font-medium text-gray-900">
+                          {section.name} (ID: {section.section_id})
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Type: {section.section_type} • Temperature: {section.temperature_range} • {sectionItems.length} items
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Warehouse: {section.warehouse_id?.name || 'Unknown'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAvailabilityColor(section.is_available)}`}>
+                        {section.is_available ? 'Available' : 'Unavailable'}
                       </span>
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {section.name} (ID: {section.section_id})
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(section)}
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(section._id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                        >
+                          Delete
+                        </button>
                       </div>
-                      <div className="text-sm text-gray-500">
-                        Type: {section.section_type} • Temperature: {section.temperature_range}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Warehouse: {section.warehouse_id?.name || 'Unknown'}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAvailabilityColor(section.is_available)}`}>
-                      {section.is_available ? 'Available' : 'Unavailable'}
-                    </span>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(section)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(section._id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                      >
-                        Delete
-                      </button>
                     </div>
                   </div>
-                </div>
-              </li>
-            ))
+                  {isExpanded && (
+                    <div className="mt-4 ml-8">
+                      {sectionItems.length > 0 ? (
+                        <ul className="space-y-2">
+                          {sectionItems.map((item) => (
+                            <li key={item._id} className="border-l-2 border-gray-200 pl-4">
+                              <div className="flex items-center">
+                                <span className="text-lg mr-2">📦</span>
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium text-gray-800">
+                                    Item ID: {item.item_id}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    Sub-Product: {item.sub_product_id?.name || 'Unknown'} • Supplier: {item.supplier_id?.name || 'Unknown'} • Expires: {new Date(item.expiration_date).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-gray-500 ml-4">No items in this section</p>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })
           ) : (
             <li className="px-6 py-4 text-center text-gray-500">
               {selectedWarehouse ? 'No sections found for this warehouse' : 'No warehouse sections found'}
