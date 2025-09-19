@@ -14,6 +14,7 @@ const Items = () => {
     sub_product_id: '',
     supplier_id: '',
     warehouse_section_id: '',
+    quantity: 0,
     expiration_date: ''
   });
 
@@ -67,6 +68,7 @@ const Items = () => {
       sub_product_id: item.sub_product_id._id,
       supplier_id: item.supplier_id._id,
       warehouse_section_id: item.warehouse_section_id._id,
+      quantity: item.quantity,
       expiration_date: item.expiration_date.split('T')[0] // Format for date input
     });
     setShowForm(true);
@@ -89,6 +91,7 @@ const Items = () => {
       sub_product_id: '',
       supplier_id: '',
       warehouse_section_id: '',
+      quantity: 0,
       expiration_date: ''
     });
   };
@@ -183,6 +186,17 @@ const Items = () => {
                   </select>
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    value={formData.quantity}
+                    onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 0})}
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700">Expiration Date</label>
                   <input
                     type="date"
@@ -235,7 +249,7 @@ const Items = () => {
                         Supplier: {item.supplier_id?.name || 'Unknown'} • Section: {item.warehouse_section_id?.name || 'Unknown'}
                       </div>
                       <div className="text-sm text-gray-500">
-                        Expires: {new Date(item.expiration_date).toLocaleDateString()}
+                        Quantity: {item.quantity} • Expires: {new Date(item.expiration_date).toLocaleDateString()}
                       </div>
                     </div>
                   </div>

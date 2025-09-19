@@ -298,7 +298,7 @@ const Products = () => {
                                     {subProductItems.map((item) => (
                                       <li key={item._id} className="flex items-center text-sm text-gray-600">
                                         <span className="mr-2">•</span>
-                                        Item ID: {item.item_id} • Supplier: {item.supplier_id?.name || 'Unknown'} • Section: {item.warehouse_section_id?.name || 'Unknown'} • Expires: {new Date(item.expiration_date).toLocaleDateString()}
+                                        Item ID: {item.item_id} • Quantity: {item.quantity} • Supplier: {item.supplier_id?.name || 'Unknown'} • Section: {item.warehouse_section_id?.name || 'Unknown'} • Expires: {new Date(item.expiration_date).toLocaleDateString()}
                                       </li>
                                     ))}
                                   </ul>

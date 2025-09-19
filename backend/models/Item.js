@@ -5,6 +5,7 @@ const itemSchema = new mongoose.Schema({
   sub_product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'SubProduct', required: true },
   supplier_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier', required: true },
   warehouse_section_id: { type: mongoose.Schema.Types.ObjectId, ref: 'WarehouseSection', required: true },
+  quantity: { type: Number, required: true, min: 0, default: 0 },
   expiration_date: { type: Date, required: true }
 });
 

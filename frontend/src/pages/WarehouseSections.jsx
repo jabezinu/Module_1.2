@@ -369,7 +369,7 @@ const WarehouseSections = () => {
                                     Item ID: {item.item_id}
                                   </div>
                                   <div className="text-sm text-gray-500">
-                                    Sub-Product: {item.sub_product_id?.name || 'Unknown'} • Supplier: {item.supplier_id?.name || 'Unknown'} • Expires: {new Date(item.expiration_date).toLocaleDateString()}
+                                    Sub-Product: {item.sub_product_id?.name || 'Unknown'} • Quantity: {item.quantity} • Supplier: {item.supplier_id?.name || 'Unknown'} • Expires: {new Date(item.expiration_date).toLocaleDateString()}
                                   </div>
                                 </div>
                               </div>
