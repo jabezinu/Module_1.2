@@ -8,7 +8,6 @@ const Products = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({
-    product_id: '',
     name: '',
     sku: '',
     description: '',
@@ -54,7 +53,6 @@ const Products = () => {
   const handleEdit = (product) => {
     setEditingProduct(product);
     setFormData({
-      product_id: product.product_id,
       name: product.name,
       sku: product.sku,
       description: product.description || '',
@@ -78,7 +76,6 @@ const Products = () => {
 
   const resetForm = () => {
     setFormData({
-      product_id: '',
       name: '',
       sku: '',
       description: '',
@@ -128,16 +125,6 @@ const Products = () => {
                 {editingProduct ? 'Edit Product' : 'Add New Product'}
               </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Product ID</label>
-                  <input
-                    type="number"
-                    required
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    value={formData.product_id}
-                    onChange={(e) => setFormData({...formData, product_id: e.target.value})}
-                  />
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>
                   <input

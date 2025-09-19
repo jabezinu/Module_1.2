@@ -8,6 +8,15 @@ const itemSchema = new mongoose.Schema({
   expiration_date: { type: Date, required: true }
 });
 
+// Pre-save middleware to generate item_id if not provided
+itemSchema.pre('save', async function(next) {
+  if (!this.item_id) {
+    const lastItem = await this.constructor.findOne({}, {}, { sort: { 'item_id': -1 } });
+    this.item_id = lastItem ? lastItem.item_id + 1 : 1;
+  }
+  next();
+});
+
 const Item = mongoose.model('Item', itemSchema);
 
 export default Item;

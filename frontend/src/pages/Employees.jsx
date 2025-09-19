@@ -1,32 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { warehouseAPI } from '../services/api';
+import { employeeAPI, warehouseAPI } from '../services/api';
 
-const Warehouses = () => {
+const Employees = () => {
+  const [employees, setEmployees] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [editingWarehouse, setEditingWarehouse] = useState(null);
+  const [editingEmployee, setEditingEmployee] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    location: '',
-    size: '',
-    capacity_unit: 'metre cube',
-    manager_id: ''
+    first_name: '',
+    last_name: '',
+    role: '',
+    phone: '',
+    email: '',
+    warehouse_id: ''
   });
 
   useEffect(() => {
-    fetchWarehouses();
+    fetchData();
   }, []);
 
-  const fetchWarehouses = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await warehouseAPI.getWarehouses();
-      setWarehouses(response.data);
+      const [employeesRes, warehousesRes] = await Promise.all([
+        employeeAPI.getEmployees(),
+        warehouseAPI.getWarehouses()
+      ]);
+
+      setEmployees(employeesRes.data);
+      setWarehouses(warehousesRes.data);
     } catch (error) {
-      console.error('Failed to fetch warehouses:', error);
-      setError('Failed to load warehouses');
+      console.error('Failed to fetch data:', error);
+      setError('Failed to load employees data');
     } finally {
       setLoading(false);
     }
@@ -35,58 +42,60 @@ const Warehouses = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (editingWarehouse) {
-        await warehouseAPI.updateWarehouse(editingWarehouse._id, formData);
+      if (editingEmployee) {
+        await employeeAPI.updateEmployee(editingEmployee._id, formData);
       } else {
-        await warehouseAPI.createWarehouse(formData);
+        await employeeAPI.createEmployee(formData);
       }
-      fetchWarehouses();
+      fetchData();
       setShowForm(false);
-      setEditingWarehouse(null);
+      setEditingEmployee(null);
       resetForm();
     } catch (error) {
-      console.error('Failed to save warehouse:', error);
-      setError('Failed to save warehouse');
+      console.error('Failed to save employee:', error);
+      setError('Failed to save employee');
     }
   };
 
-  const handleEdit = (warehouse) => {
-    setEditingWarehouse(warehouse);
+  const handleEdit = (employee) => {
+    setEditingEmployee(employee);
     setFormData({
-      name: warehouse.name,
-      location: warehouse.location,
-      size: warehouse.size,
-      capacity_unit: warehouse.capacity_unit,
-      manager_id: warehouse.manager_id?._id || warehouse.manager_id
+      first_name: employee.first_name,
+      last_name: employee.last_name,
+      role: employee.role,
+      phone: employee.phone,
+      email: employee.email,
+      warehouse_id: employee.warehouse_id?._id || employee.warehouse_id
     });
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this warehouse?')) {
+    if (window.confirm('Are you sure you want to delete this employee?')) {
       try {
-        await warehouseAPI.deleteWarehouse(id);
-        fetchWarehouses();
+        await employeeAPI.deleteEmployee(id);
+        fetchData();
       } catch (error) {
-        console.error('Failed to delete warehouse:', error);
-        setError('Failed to delete warehouse');
+        console.error('Failed to delete employee:', error);
+        setError('Failed to delete employee');
       }
     }
   };
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      location: '',
-      size: '',
-      capacity_unit: 'metre cube',
-      manager_id: ''
+      first_name: '',
+      last_name: '',
+      role: '',
+      phone: '',
+      email: '',
+      warehouse_id: ''
     });
   };
 
   const handleCancel = () => {
     setShowForm(false);
-    setEditingWarehouse(null);
+    setEditingEmployee(null);
     resetForm();
   };
 
@@ -101,12 +110,12 @@ const Warehouses = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Warehouses</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Employees</h1>
         <button
           onClick={() => setShowForm(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
         >
-          Add Warehouse
+          Add Employee
         </button>
       </div>
 
@@ -122,58 +131,74 @@ const Warehouses = () => {
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {editingWarehouse ? 'Edit Warehouse' : 'Add New Warehouse'}
+                {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
               </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <label className="block text-sm font-medium text-gray-700">First Name</label>
                   <input
                     type="text"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    value={formData.first_name}
+                    onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Location</label>
+                  <label className="block text-sm font-medium text-gray-700">Last Name</label>
                   <input
                     type="text"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    value={formData.location}
-                    onChange={(e) => setFormData({...formData, location: e.target.value})}
+                    value={formData.last_name}
+                    onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Size</label>
-                  <input
-                    type="number"
-                    required
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    value={formData.size}
-                    onChange={(e) => setFormData({...formData, size: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Capacity Unit</label>
+                  <label className="block text-sm font-medium text-gray-700">Role</label>
                   <input
                     type="text"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    value={formData.capacity_unit}
-                    onChange={(e) => setFormData({...formData, capacity_unit: e.target.value})}
+                    value={formData.role}
+                    onChange={(e) => setFormData({...formData, role: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Manager ID</label>
+                  <label className="block text-sm font-medium text-gray-700">Phone</label>
                   <input
                     type="text"
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    value={formData.manager_id}
-                    onChange={(e) => setFormData({...formData, manager_id: e.target.value})}
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    required
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Warehouse</label>
+                  <select
+                    required
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    value={formData.warehouse_id}
+                    onChange={(e) => setFormData({...formData, warehouse_id: e.target.value})}
+                  >
+                    <option value="">Select Warehouse</option>
+                    {warehouses.map(warehouse => (
+                      <option key={warehouse._id} value={warehouse._id}>
+                        {warehouse.name} ({warehouse.location})
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
@@ -187,7 +212,7 @@ const Warehouses = () => {
                     type="submit"
                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                   >
-                    {editingWarehouse ? 'Update' : 'Create'}
+                    {editingEmployee ? 'Update' : 'Create'}
                   </button>
                 </div>
               </form>
@@ -196,38 +221,41 @@ const Warehouses = () => {
         </div>
       )}
 
-      {/* Warehouses Table */}
+      {/* Employees Table */}
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <ul className="divide-y divide-gray-200">
-          {warehouses.length > 0 ? (
-            warehouses.map((warehouse) => (
-              <li key={warehouse._id} className="px-6 py-4">
+          {employees.length > 0 ? (
+            employees.map((employee) => (
+              <li key={employee._id} className="px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <span className="text-2xl">🏭</span>
+                      <span className="text-2xl">👤</span>
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900">
-                        {warehouse.name} (ID: {warehouse.warehouse_id})
+                        {employee.first_name} {employee.last_name} (ID: {employee.employee_id})
                       </div>
                       <div className="text-sm text-gray-500">
-                        {warehouse.location} • {warehouse.size} {warehouse.capacity_unit}
+                        Role: {employee.role}
                       </div>
                       <div className="text-sm text-gray-500">
-                        Manager: {warehouse.manager_id?.first_name} {warehouse.manager_id?.last_name}
+                        Phone: {employee.phone} • Email: {employee.email}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Warehouse: {employee.warehouse_id?.name || 'Not assigned'}
                       </div>
                     </div>
                   </div>
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => handleEdit(warehouse)}
+                      onClick={() => handleEdit(employee)}
                       className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(warehouse._id)}
+                      onClick={() => handleDelete(employee._id)}
                       className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
                     >
                       Delete
@@ -238,7 +266,7 @@ const Warehouses = () => {
             ))
           ) : (
             <li className="px-6 py-4 text-center text-gray-500">
-              No warehouses found
+              No employees found
             </li>
           )}
         </ul>
@@ -247,4 +275,4 @@ const Warehouses = () => {
   );
 };
 
-export default Warehouses;
+export default Employees;
