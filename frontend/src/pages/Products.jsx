@@ -295,20 +295,27 @@ const Products = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Products, Sub-Products & Items</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-        >
-          Add Product
-        </button>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-2xl p-8 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Product Management</h1>
+            <p className="text-purple-100 text-lg">Manage your inventory hierarchy</p>
+          </div>
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl text-sm font-semibold backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-200 shadow-lg flex items-center"
+          >
+            <span className="mr-2">📦</span>
+            Add Product
+          </button>
+        </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-800">{error}</div>
+        <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl p-4 shadow-md">
+          <div className="text-red-800 font-medium">{error}</div>
         </div>
       )}
 
@@ -526,154 +533,163 @@ const Products = () => {
       )}
 
       {/* Products Hierarchy */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
-          {products.length > 0 ? (
-            products.map((product) => {
-              const productSubProducts = getSubProductsForProduct(product._id);
-              const isExpanded = expandedProducts.has(product._id);
-              return (
-                <li key={product._id} className="px-6 py-4">
+      <div className="space-y-6">
+        {products.length > 0 ? (
+          products.map((product) => {
+            const productSubProducts = getSubProductsForProduct(product._id);
+            const isExpanded = expandedProducts.has(product._id);
+            return (
+              <div key={product._id} className="bg-white shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100">
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center flex-1">
-                      <div className="flex-shrink-0">
-                        <button
-                          onClick={() => toggleProductExpansion(product._id)}
-                          className="text-gray-400 hover:text-gray-600 mr-2"
-                        >
-                          {isExpanded ? '▼' : '▶'}
-                        </button>
-                        <span className="text-2xl">📦</span>
+                      <button
+                        onClick={() => toggleProductExpansion(product._id)}
+                        className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-200 mr-4 shadow-md"
+                      >
+                        {isExpanded ? '▼' : '▶'}
+                      </button>
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl shadow-lg mr-4">
+                        📦
                       </div>
-                      <div className="ml-4 flex-1">
-                        <div className="text-sm font-medium text-gray-900">
-                          {product.name} (ID: {product.product_id})
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-900 mb-1">
+                          {product.name}
+                        </h3>
+                        <div className="text-sm text-gray-600 mb-2">
+                          ID: {product.product_id} • SKU: {product.sku} • Category: {product.category}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          SKU: {product.sku} • Category: {product.category} • {productSubProducts.length} sub-products
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          Storage: {product.storage_condition}
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <span>Storage: {product.storage_condition}</span>
+                          <span>•</span>
+                          <span>{productSubProducts.length} sub-products</span>
                         </div>
                         {product.description && (
-                          <div className="text-sm text-gray-500 mt-1">
+                          <div className="text-sm text-gray-600 mt-2 italic">
                             {product.description}
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-3">
                       <button
                         onClick={() => handleAddSubProduct(product._id)}
-                        className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+                        className="bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md"
                       >
                         Add Sub-Product
                       </button>
                       <button
                         onClick={() => handleEdit(product)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
+                        className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(product._id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                        className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md"
                       >
                         Delete
                       </button>
                     </div>
                   </div>
                   {isExpanded && (
-                    <div className="mt-4 ml-8">
+                    <div className="mt-6 pt-6 border-t border-gray-100">
                       {productSubProducts.length > 0 ? (
-                        <ul className="space-y-2">
+                        <div className="space-y-4">
                           {productSubProducts.map((subProduct) => {
                             const subProductItems = getItemsForSubProduct(subProduct._id);
                             const isSubProductExpanded = expandedSubProducts.has(subProduct._id);
                             return (
-                              <li key={subProduct._id} className="border-l-2 border-gray-200 pl-4">
+                              <div key={subProduct._id} className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 border-l-4 border-purple-500 ml-8">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center flex-1">
                                     <button
                                       onClick={() => toggleSubProductExpansion(subProduct._id)}
-                                      className="text-gray-400 hover:text-gray-600 mr-2"
+                                      className="w-6 h-6 bg-gradient-to-r from-blue-500 to-teal-500 rounded-full flex items-center justify-center text-white hover:from-blue-600 hover:to-teal-600 transition-all duration-200 mr-3 shadow-sm"
                                     >
                                       {isSubProductExpanded ? '▼' : '▶'}
                                     </button>
-                                    <span className="text-lg mr-2">📦</span>
+                                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-teal-500 rounded-lg flex items-center justify-center text-white text-sm shadow-md mr-3">
+                                      📦
+                                    </div>
                                     <div className="flex-1">
-                                      <div className="text-sm font-medium text-gray-800">
-                                        {subProduct.name} (ID: {subProduct.sub_product_id})
-                                      </div>
-                                      <div className="text-sm text-gray-500">
-                                        Unit Size: {subProduct.unit_size} • {subProductItems.length} items
+                                      <h4 className="text-lg font-semibold text-gray-800 mb-1">
+                                        {subProduct.name}
+                                      </h4>
+                                      <div className="text-sm text-gray-600">
+                                        ID: {subProduct.sub_product_id} • Unit Size: {subProduct.unit_size} • {subProductItems.length} items
                                       </div>
                                     </div>
                                   </div>
                                   <div className="flex space-x-2">
                                     <button
                                       onClick={() => handleAddItem(subProduct._id)}
-                                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                                      className="bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md"
                                     >
                                       Add Item
                                     </button>
                                     <button
                                       onClick={() => handleEditSubProduct(subProduct)}
-                                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
+                                      className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md"
                                     >
                                       Edit
                                     </button>
                                     <button
                                       onClick={() => handleDeleteSubProduct(subProduct._id)}
-                                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                                      className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md"
                                     >
                                       Delete
                                     </button>
                                   </div>
                                 </div>
                                 {isSubProductExpanded && subProductItems.length > 0 && (
-                                  <ul className="mt-2 ml-8 space-y-1">
+                                  <div className="mt-4 ml-12 space-y-2">
                                     {subProductItems.map((item) => (
-                                      <li key={item._id} className="flex items-center justify-between border-l-2 border-gray-100 pl-4">
-                                        <div className="text-sm text-gray-600">
-                                          Item ID: {item.item_id} • Quantity: {item.quantity} • Supplier: {item.supplier_id?.name || 'Unknown'} • Section: {item.warehouse_section_id?.name || 'Unknown'} • Expires: {new Date(item.expiration_date).toLocaleDateString()}
+                                      <div key={item._id} className="bg-white rounded-lg p-3 shadow-sm border border-gray-200 flex items-center justify-between">
+                                        <div className="text-sm text-gray-700">
+                                          <span className="font-medium">Item ID: {item.item_id}</span> • Quantity: {item.quantity} • Supplier: {item.supplier_id?.name || 'Unknown'} • Section: {item.warehouse_section_id?.name || 'Unknown'} • Expires: {new Date(item.expiration_date).toLocaleDateString()}
                                         </div>
                                         <div className="flex space-x-2">
                                           <button
                                             onClick={() => handleEditItem(item)}
-                                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs"
+                                            className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-3 py-1 rounded text-xs font-medium transition-all duration-200 shadow-sm"
                                           >
                                             Edit
                                           </button>
                                           <button
                                             onClick={() => handleDeleteItem(item._id)}
-                                            className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs"
+                                            className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white px-3 py-1 rounded text-xs font-medium transition-all duration-200 shadow-sm"
                                           >
                                             Delete
                                           </button>
                                         </div>
-                                      </li>
+                                      </div>
                                     ))}
-                                  </ul>
+                                  </div>
                                 )}
-                              </li>
+                              </div>
                             );
                           })}
-                        </ul>
+                        </div>
                       ) : (
-                        <p className="text-sm text-gray-500 ml-4">No sub-products found</p>
+                        <div className="text-center py-8 text-gray-500">
+                          <div className="text-2xl mb-2">📦</div>
+                          <div>No sub-products found</div>
+                        </div>
                       )}
                     </div>
                   )}
-                </li>
-              );
-            })
-          ) : (
-            <li className="px-6 py-4 text-center text-gray-500">
-              No products found
-            </li>
-          )}
-        </ul>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="bg-white shadow-xl rounded-2xl p-12 text-center border border-gray-100">
+            <div className="text-gray-400 text-4xl mb-4">📦</div>
+            <div className="text-gray-500 text-lg">No products found</div>
+            <div className="text-gray-400 text-sm mt-1">Add your first product to get started</div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -108,20 +108,27 @@ const Employees = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Employees</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-        >
-          Add Employee
-        </button>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-green-600 via-teal-600 to-blue-600 rounded-2xl p-8 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Employee Management</h1>
+            <p className="text-green-100 text-lg">Manage your warehouse team members</p>
+          </div>
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl text-sm font-semibold backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-200 shadow-lg flex items-center"
+          >
+            <span className="mr-2">➕</span>
+            Add Employee
+          </button>
+        </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-800">{error}</div>
+        <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl p-4 shadow-md">
+          <div className="text-red-800 font-medium">{error}</div>
         </div>
       )}
 
@@ -221,55 +228,61 @@ const Employees = () => {
         </div>
       )}
 
-      {/* Employees Table */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
-          {employees.length > 0 ? (
-            employees.map((employee) => (
-              <li key={employee._id} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <span className="text-2xl">👤</span>
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {employee.first_name} {employee.last_name} (ID: {employee.employee_id})
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Role: {employee.role}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Phone: {employee.phone} • Email: {employee.email}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Warehouse: {employee.warehouse_id?.name || 'Not assigned'}
-                      </div>
-                    </div>
+      {/* Employees Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {employees.length > 0 ? (
+          employees.map((employee) => (
+            <div key={employee._id} className="bg-white shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+              <div className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white text-xl shadow-lg">
+                    👤
                   </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleEdit(employee)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(employee._id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Delete
-                    </button>
+                  <div className="ml-4">
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {employee.first_name} {employee.last_name}
+                    </h3>
+                    <p className="text-sm text-gray-600">ID: {employee.employee_id}</p>
                   </div>
                 </div>
-              </li>
-            ))
-          ) : (
-            <li className="px-6 py-4 text-center text-gray-500">
-              No employees found
-            </li>
-          )}
-        </ul>
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="font-medium mr-2">Role:</span> {employee.role}
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="font-medium mr-2">Phone:</span> {employee.phone}
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="font-medium mr-2">Email:</span> {employee.email}
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="font-medium mr-2">Warehouse:</span> {employee.warehouse_id?.name || 'Not assigned'}
+                  </div>
+                </div>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => handleEdit(employee)}
+                    className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(employee._id)}
+                    className="flex-1 bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="col-span-full bg-white shadow-xl rounded-2xl p-12 text-center border border-gray-100">
+            <div className="text-gray-400 text-4xl mb-4">👥</div>
+            <div className="text-gray-500 text-lg">No employees found</div>
+            <div className="text-gray-400 text-sm mt-1">Add your first employee to get started</div>
+          </div>
+        )}
       </div>
     </div>
   );

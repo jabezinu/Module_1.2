@@ -166,31 +166,44 @@ const Shipments = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Shipments</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-        >
-          Create Shipment
-        </button>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-8 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Shipment Management</h1>
+            <p className="text-emerald-100 text-lg">Track and manage your logistics operations</p>
+          </div>
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl text-sm font-semibold backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-200 shadow-lg flex items-center"
+          >
+            <span className="mr-2">📦</span>
+            Create Shipment
+          </button>
+        </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-800">{error}</div>
+        <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl p-4 shadow-md">
+          <div className="text-red-800 font-medium">{error}</div>
         </div>
       )}
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-md shadow">
+      <div className="bg-white shadow-xl rounded-2xl p-6 border border-gray-100">
+        <div className="flex items-center mb-4">
+          <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center text-white mr-3">
+            🔍
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Filter Shipments</h3>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <select
             name="status"
             value={filters.status}
             onChange={handleFilterChange}
-            className="border border-gray-300 rounded-md px-3 py-2"
+            className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
@@ -202,7 +215,7 @@ const Shipments = () => {
             name="shipment_type"
             value={filters.shipment_type}
             onChange={handleFilterChange}
-            className="border border-gray-300 rounded-md px-3 py-2"
+            className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
           >
             <option value="">All Types</option>
             <option value="supplier_to_warehouse">Supplier to Warehouse</option>
@@ -213,7 +226,7 @@ const Shipments = () => {
             name="warehouse_id"
             value={filters.warehouse_id}
             onChange={handleFilterChange}
-            className="border border-gray-300 rounded-md px-3 py-2"
+            className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
           >
             <option value="">All Warehouses</option>
             {warehouses.map(warehouse => (
@@ -224,7 +237,7 @@ const Shipments = () => {
           </select>
           <button
             onClick={applyFilters}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg"
           >
             Apply Filters
           </button>
@@ -232,23 +245,21 @@ const Shipments = () => {
       </div>
 
       {/* Shipments List */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
-          {shipments.length > 0 ? (
-            shipments.map((shipment) => (
-              <li key={shipment._id} className="px-6 py-4">
+      <div className="space-y-4">
+        {shipments.length > 0 ? (
+          shipments.map((shipment) => (
+            <div key={shipment._id} className="bg-white shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100">
+              <div className="p-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <span className="text-2xl">
-                        {getShipmentTypeIcon(shipment.shipment_type)}
-                      </span>
+                  <div className="flex items-center flex-1">
+                    <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center text-white text-xl shadow-lg mr-4">
+                      {getShipmentTypeIcon(shipment.shipment_type)}
                     </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">
                         Shipment #{shipment.shipment_id}
-                      </div>
-                      <div className="text-sm text-gray-500">
+                      </h3>
+                      <div className="text-sm text-gray-600 mb-2">
                         {shipment.shipment_type.replace(/_/g, ' ')} • {shipment.items?.length || 0} items
                       </div>
                       <div className="text-sm text-gray-500">
@@ -261,13 +272,13 @@ const Shipments = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(shipment.status)}`}>
-                      {shipment.status}
+                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(shipment.status)}`}>
+                      {shipment.status.replace(/_/g, ' ')}
                     </span>
                     {shipment.status === 'pending' && (
                       <button
                         onClick={() => handleStatusUpdate(shipment._id, 'in_transit')}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md"
                       >
                         Start Transit
                       </button>
@@ -275,21 +286,23 @@ const Shipments = () => {
                     {shipment.status === 'in_transit' && (
                       <button
                         onClick={() => handleStatusUpdate(shipment._id, 'delivered')}
-                        className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-md"
                       >
                         Mark Delivered
                       </button>
                     )}
                   </div>
                 </div>
-              </li>
-            ))
-          ) : (
-            <li className="px-6 py-4 text-center text-gray-500">
-              No shipments found
-            </li>
-          )}
-        </ul>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="bg-white shadow-xl rounded-2xl p-12 text-center border border-gray-100">
+            <div className="text-gray-400 text-4xl mb-4">📦</div>
+            <div className="text-gray-500 text-lg">No shipments found</div>
+            <div className="text-gray-400 text-sm mt-1">Create your first shipment to get started</div>
+          </div>
+        )}
       </div>
 
       {/* Create Shipment Modal */}
