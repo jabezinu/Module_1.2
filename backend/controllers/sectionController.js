@@ -1,4 +1,4 @@
-`import WarehouseSection from '../models/WarehouseSection.js';
+import WarehouseSection from '../models/WarehouseSection.js';
 import Warehouse from '../models/Warehouse.js';
 
 export const createSection = async (req, res) => {
