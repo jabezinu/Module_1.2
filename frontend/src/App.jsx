@@ -49,7 +49,7 @@ const AppRoutes = () => {
                 <Route path="/suppliers" element={<Suppliers />} />
                 <Route path="/carriers" element={<Carriers />} />
                 <Route path="/shipments" element={<Shipments />} />
-                <Route path="/admins" element={<div>Admins Page</div>} />
+                {/* <Route path="/admins" element={<div>Admins Page</div>} /> */}
               </Routes>
             </Layout>
           </ProtectedRoute>
