@@ -38,7 +38,7 @@ const Layout = ({ children }) => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 text-white transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 text-white transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0`}>
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h1 className="text-xl font-bold">Warehouse MS</h1>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-gray-300 hover:text-white">
@@ -76,7 +76,7 @@ const Layout = ({ children }) => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1">
+      <div className="flex-1 lg:ml-64">
         {/* Mobile header */}
         <div className="lg:hidden bg-white shadow-sm p-4 flex items-center">
           <button onClick={() => setSidebarOpen(true)} className="text-gray-500 hover:text-gray-700 mr-4">
