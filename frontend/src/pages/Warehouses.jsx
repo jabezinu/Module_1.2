@@ -367,14 +367,21 @@ const Warehouses = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Temperature Range</label>
-                  <input
-                    type="text"
+                  <select
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     value={sectionFormData.temperature_range}
                     onChange={(e) => setSectionFormData({...sectionFormData, temperature_range: e.target.value})}
-                    placeholder="e.g., 0–5°C, Room Temperature, -20°C"
-                  />
+                  >
+                    <option value="">Select Temperature Range</option>
+                    <option value="Frozen Storage: -18°C to -25°C">Frozen Storage: -18°C to -25°C</option>
+                    <option value="Refrigerated: 0°C to 5°C">Refrigerated: 0°C to 5°C</option>
+                    <option value="Cool Storage: 5°C to 15°C">Cool Storage: 5°C to 15°C</option>
+                    <option value="Room Temperature: 15°C to 25°C">Room Temperature: 15°C to 25°C</option>
+                    <option value="Ambient: 20°C to 30°C">Ambient: 20°C to 30°C</option>
+                    <option value="Controlled Room Temperature: 20°C to 25°C">Controlled Room Temperature: 20°C to 25°C</option>
+                    <option value="Warm: 25°C to 35°C">Warm: 25°C to 35°C</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -383,6 +390,7 @@ const Warehouses = () => {
                       className="mr-2"
                       checked={sectionFormData.is_available}
                       onChange={(e) => setSectionFormData({...sectionFormData, is_available: e.target.checked})}
+                      defaultChecked={true}
                     />
                     Available for Use
                   </label>

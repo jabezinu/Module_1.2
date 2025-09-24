@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { shipmentAPI, warehouseAPI, supplierAPI, carrierAPI, itemAPI } from '../services/api';
+import { shipmentAPI, warehouseAPI, supplierAPI, carrierAPI, itemAPI, employeeAPI } from '../services/api';
 
 const Shipments = () => {
   const [shipments, setShipments] = useState([]);
@@ -7,6 +7,7 @@ const Shipments = () => {
   const [suppliers, setSuppliers] = useState([]);
   const [carriers, setCarriers] = useState([]);
   const [items, setItems] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -24,6 +25,7 @@ const Shipments = () => {
     destination_address: '',
     destination_contact: '',
     carrier_id: '',
+    employee_id: '',
     items: [{ item_id: '', quantity: 1 }],
     priority: 'medium',
     notes: ''
@@ -36,12 +38,13 @@ const Shipments = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [shipmentsRes, warehousesRes, suppliersRes, carriersRes, itemsRes] = await Promise.all([
+      const [shipmentsRes, warehousesRes, suppliersRes, carriersRes, itemsRes, employeesRes] = await Promise.all([
         shipmentAPI.getShipments(),
         warehouseAPI.getWarehouses(),
         supplierAPI.getSuppliers(),
         carrierAPI.getCarriers(),
-        itemAPI.getItems()
+        itemAPI.getItems(),
+        employeeAPI.getEmployees()
       ]);
 
       setShipments(shipmentsRes.data.shipments || []);
@@ -49,6 +52,7 @@ const Shipments = () => {
       setSuppliers(suppliersRes.data);
       setCarriers(carriersRes.data);
       setItems(itemsRes.data);
+      setEmployees(employeesRes.data);
     } catch (error) {
       console.error('Failed to fetch data:', error);
       setError('Failed to load shipments data');
@@ -109,6 +113,7 @@ const Shipments = () => {
       destination_address: '',
       destination_contact: '',
       carrier_id: '',
+      employee_id: '',
       items: [{ item_id: '', quantity: 1 }],
       priority: 'medium',
       notes: ''
@@ -287,31 +292,238 @@ const Shipments = () => {
         </ul>
       </div>
 
-      {/* Create Shipment Modal - Simplified for brevity */}
+      {/* Create Shipment Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white max-h-96 overflow-y-auto">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Create New Shipment</h3>
               <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Shipment Type</label>
+                    <select
+                      required
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                      value={formData.shipment_type}
+                      onChange={(e) => setFormData({...formData, shipment_type: e.target.value})}
+                    >
+                      <option value="warehouse_to_customer">Warehouse to Customer</option>
+                      <option value="warehouse_to_warehouse">Warehouse to Warehouse</option>
+                      <option value="supplier_to_warehouse">Supplier to Warehouse</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Carrier</label>
+                    <select
+                      required
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                      value={formData.carrier_id}
+                      onChange={(e) => setFormData({...formData, carrier_id: e.target.value})}
+                    >
+                      <option value="">Select Carrier</option>
+                      {carriers.map(carrier => (
+                        <option key={carrier._id} value={carrier._id}>
+                          {carrier.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Employee</label>
+                    <select
+                      required
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                      value={formData.employee_id}
+                      onChange={(e) => setFormData({...formData, employee_id: e.target.value})}
+                    >
+                      <option value="">Select Employee</option>
+                      {employees.map(employee => (
+                        <option key={employee._id} value={employee._id}>
+                          {employee.first_name} {employee.last_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Priority</label>
+                    <select
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                      value={formData.priority}
+                      onChange={(e) => setFormData({...formData, priority: e.target.value})}
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Origin Warehouse - Required for all types */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Shipment Type</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Origin Warehouse {formData.shipment_type === 'supplier_to_warehouse' ? '(Destination)' : ''}
+                  </label>
                   <select
                     required
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
-                    value={formData.shipment_type}
-                    onChange={(e) => setFormData({...formData, shipment_type: e.target.value})}
+                    value={formData.origin_warehouse_id}
+                    onChange={(e) => setFormData({...formData, origin_warehouse_id: e.target.value})}
                   >
-                    <option value="warehouse_to_customer">Warehouse to Customer</option>
-                    <option value="warehouse_to_warehouse">Warehouse to Warehouse</option>
-                    <option value="supplier_to_warehouse">Supplier to Warehouse</option>
+                    <option value="">Select Warehouse</option>
+                    {warehouses.map(warehouse => (
+                      <option key={warehouse._id} value={warehouse._id}>
+                        {warehouse.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                {/* Add more form fields as needed */}
+
+                {/* Supplier - Only for supplier_to_warehouse */}
+                {formData.shipment_type === 'supplier_to_warehouse' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Supplier</label>
+                    <select
+                      required
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                      value={formData.supplier_id}
+                      onChange={(e) => setFormData({...formData, supplier_id: e.target.value})}
+                    >
+                      <option value="">Select Supplier</option>
+                      {suppliers.map(supplier => (
+                        <option key={supplier._id} value={supplier._id}>
+                          {supplier.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Destination Warehouse - Only for warehouse_to_warehouse */}
+                {formData.shipment_type === 'warehouse_to_warehouse' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Destination Warehouse</label>
+                    <select
+                      required
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                      value={formData.destination_warehouse_id}
+                      onChange={(e) => setFormData({...formData, destination_warehouse_id: e.target.value})}
+                    >
+                      <option value="">Select Warehouse</option>
+                      {warehouses.filter(w => w._id !== formData.origin_warehouse_id).map(warehouse => (
+                        <option key={warehouse._id} value={warehouse._id}>
+                          {warehouse.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Customer Details - Only for warehouse_to_customer */}
+                {formData.shipment_type === 'warehouse_to_customer' && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Customer Address</label>
+                        <input
+                          type="text"
+                          required
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                          value={formData.destination_address}
+                          onChange={(e) => setFormData({...formData, destination_address: e.target.value})}
+                          placeholder="Customer address"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Customer Contact</label>
+                        <input
+                          type="text"
+                          required
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                          value={formData.destination_contact}
+                          onChange={(e) => setFormData({...formData, destination_contact: e.target.value})}
+                          placeholder="Phone or email"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Items */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Items</label>
+                  {formData.origin_warehouse_id ? (
+                    <>
+                      {formData.items.map((item, index) => (
+                        <div key={index} className="flex items-center space-x-2 mb-2">
+                          <select
+                            required
+                            className="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                            value={item.item_id}
+                            onChange={(e) => updateItem(index, 'item_id', e.target.value)}
+                          >
+                            <option value="">Select Item</option>
+                            {items
+                              .filter(itemOption => itemOption.warehouse_section_id?.warehouse_id === formData.origin_warehouse_id)
+                              .map(itemOption => (
+                                <option key={itemOption._id} value={itemOption._id}>
+                                  {itemOption.sub_product_id?.name} - Available: {itemOption.quantity}
+                                </option>
+                              ))}
+                          </select>
+                          <input
+                            type="number"
+                            min="1"
+                            required
+                            className="w-20 border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                            value={item.quantity}
+                            onChange={(e) => updateItem(index, 'quantity', e.target.value)}
+                            placeholder="Qty"
+                          />
+                          {formData.items.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeItem(index)}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={addItem}
+                        className="text-blue-600 hover:text-blue-800 text-sm"
+                      >
+                        + Add Item
+                      </button>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-500">Please select an origin warehouse first to see available items.</p>
+                  )}
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Notes</label>
+                  <textarea
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                    rows="3"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    placeholder="Optional notes"
+                  />
+                </div>
+
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
-                    onClick={() => setShowForm(false)}
+                    onClick={() => { setShowForm(false); resetForm(); }}
                     className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium"
                   >
                     Cancel
@@ -320,7 +532,7 @@ const Shipments = () => {
                     type="submit"
                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                   >
-                    Create
+                    Create Shipment
                   </button>
                 </div>
               </form>
