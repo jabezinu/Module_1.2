@@ -132,6 +132,7 @@ const Carriers = () => {
         </div>
       </div>
 
+      {/* Error Message */}
       {error && (
         <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl p-4 shadow-md">
           <div className="text-red-800 font-medium">{error}</div>
